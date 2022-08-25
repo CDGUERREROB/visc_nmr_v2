@@ -33,8 +33,7 @@ def dist_box_stats(dataframe, feature, scale,  bins):
         bbox=[0., -0.45, 1, .20],
         fontsize=25
         )
-    plt.savefig(f"../reports/figures/KDE-Boxplot_{feature}.png", quality=100, bbox_inches='tight', dpi=100
-    )
+    plt.savefig(f"../reports/figures/KDE-Boxplot_{feature}.png", quality=100, bbox_inches='tight', dpi=100, transparent = True)
     plt.show();
 
 def t2lm_visc(dataset):
@@ -47,7 +46,7 @@ def t2lm_visc(dataset):
     ax = plt.scatter(
         x,
         y,
-        # c=s,
+        c='#006837',
         # cmap=cm,
         alpha=0.5
         )
@@ -62,10 +61,11 @@ def t2lm_visc(dataset):
 
     plt.grid(True, alpha=0.5)
 
-    plt.savefig(f"../reports/figures/ViscvsT2LM_Temp.png", quality=100, bbox_inches='tight', dpi=1000)
+    plt.savefig(f"../reports/figures/ViscvsT2LM_Temp.png", quality=100, bbox_inches='tight', dpi=1000, transparent = True)
 
 def pplot(df):
-    pp = sns.pairplot(df, diag_kind='kde')
+    
+    pp = sns.pairplot(df, diag_kind='kde',)
 
     log_columns = ['Viscosity (cP)', 'T2lm (ms)']
 
@@ -79,8 +79,8 @@ def pplot(df):
 def corr_plot(df, method, figsize, name):
     plt.figure(figsize=figsize)
     plt.title(f'Correlation Coeficient Matrix - {method}', pad=10)
-    sns.heatmap(df.corr(method), annot = True, cmap='coolwarm')
-    plt.savefig(f"../reports/figures/CorrCoefMatrix_{name}_{method}.png", quality=100, bbox_inches='tight', dpi=1000)
+    sns.heatmap(df.corr(method), annot = True, cmap='GnBu')
+    plt.savefig(f"../reports/figures/CorrCoefMatrix_{name}_{method}.png", quality=100, bbox_inches='tight', dpi=1000, transparent = True)
     plt.show();
 
 def regression_plots(y, y_pred, name):
@@ -93,21 +93,22 @@ def regression_plots(y, y_pred, name):
         Y,
         Y_pred,
         s=75,
-        alpha=0.75,
+        alpha=0.5,
         label=
         f"R{chr(0x00b2)}: {r2_score(y, y_pred).round(3)}",
-        edgecolor='k'
+        edgecolor='k',
+        color = '#042845'
     )
-    ax.plot([Y.min(), Y.max()], [Y.min(), Y.max()], 'r--', lw=1.5, label="Identity")
+    ax.plot([Y.min(), Y.max()], [Y.min(), Y.max()], 'r--', lw=2, label="Identity", color='r')
     # ax.plot([Y.min(), Y.max()], [Y.min()+10, Y.max()+10], 'k:', lw=3, alpha=0.75)
     ax.set_title(f'Error plot - {name}', pad=15)
     ax.set_xlabel('y')
     ax.set_ylabel('y\u0302')
     ax.set_xscale('log')
     ax.set_yscale('log')
-    plt.grid(True, which="both", ls="-", color='0.8')
+    plt.grid(True, which="both", ls="-", color='0.9')
     plt.legend(frameon=True)
-    plt.savefig(f'../reports/figures/Errorplot_{name}.png', dpi=500, bbox_inches='tight')
+    plt.savefig(f'../reports/figures/Errorplot_{name}.png', dpi=500, bbox_inches='tight', transparent = True)
     plt.show()
 
     # fig, ax2 = plt.subplots(figsize=(6, 5))
@@ -130,7 +131,7 @@ def regression_plots(y, y_pred, name):
     # ax2.set_ylabel("y\u0302")
     # ax2.set_xscale('log')
 
-    # plt.savefig(f'../reports/figures/Residuos_{name}.png', dpi=500, bbox_inches='tight')
+    # plt.savefig(f'../reports/figures/Residuos_{name}.png', dpi=500, bbox_inches='tight', transparent = True)
     # plt.show()
 
 def plot_regression(model, X_train, y_train, X_test, y_test):
@@ -153,10 +154,11 @@ def plot_regression(model, X_train, y_train, X_test, y_test):
 from yellowbrick.model_selection import FeatureImportances
 
 def feature_importance(model, X, y):
-    plt.figure(figsize=(6,4))
+    plt.figure(figsize=(5,7))
     viz = FeatureImportances(model)
     viz.fit(X, y)
-    plt.savefig(f'../reports/figures/feature_importance.png', dpi=500, bbox_inches='tight')
+    plt.title(f'Feature Importance using RandomForestRegressor', pad=15)
+    plt.savefig(f'../reports/figures/feature_importance.png', dpi=500, bbox_inches='tight', transparent = True)
 
     viz.show()
 
@@ -182,7 +184,7 @@ def regression_metrics_models(model_name, y_test, y_test_pred):
 
     mae = mean_absolute_error((y_test), (y_test_pred)).round(2)
     rmse = (math.sqrt(mean_squared_error((y_test), (y_test_pred))))
-    r2 = r2_score(np.log10(y_test), np.log10(y_test_pred)).round(3)
+    r2 = r2_score(10**(y_test), 10**(y_test_pred)).round(3)
 
     print(f"============== Regression Metrics : {model_name} ===============")
     print(f'R{chr(0x00b2)}: {r2}\tMAE: {mae}\tRMSE: {rmse}\n')
@@ -358,11 +360,13 @@ def compare_ml(metrics_ml, name):
     ax3 = ax.twinx()
 
     ax.set_xlim(-0.5, 4)
+
     ax.set_ylim(0.9, 1.01)
-    ax2.set_ylim(6000, metrics_ml['RMSE'].max()+300)
-    ax3.set_ylim(2000,metrics_ml['MAE'].max()+300)
+    ax2.set_ylim(0, 15000)
+    ax3.set_ylim(1000,5000)
 
     ax.set_xlabel('Machine Learning Models', size=12)
+    ax.xaxis.set_label_coords(0.5, -.125)
     ax.set_ylabel(f'R{chr(0x00b2)}',)
     ax2.set_ylabel('RMSE')
     ax3.set_ylabel('MAE')
@@ -386,22 +390,22 @@ def compare_ml(metrics_ml, name):
 
     for p in p1:
         height = p.get_height()
-        ax.text(x=p.get_x()+0.05, y=height+0.001,s="{}".format(height),ha='center', fontsize=10)
+        ax.text(x=p.get_x()+0.05, y=height+0.0025,s="{}".format(height),ha='center', fontsize=10)
 
     for p in p4:
         height = p.get_height()
-        ax2.text(x=p.get_x()+0.05, y=height+50,s="{}".format(height),ha='center', fontsize=10)
+        ax2.text(x=p.get_x()+0.05, y=height+250,s="{}".format(height),ha='center', fontsize=10)
 
     for p in p6:
         height = p.get_height()
-        ax3.text(x=p.get_x()+0.075, y=height+25,s="{}".format(height),ha='center', fontsize=10)
+        ax3.text(x=p.get_x()+0.075, y=height+50,s="{}".format(height),ha='center', fontsize=10)
 
     plt.savefig(f'../reports/figures/compare_ML{name}.png', dpi=500, bbox_inches='tight', transparent = True)
     plt.show();
 
 def compare_prev(metrics_ml, name):
     import numpy as np
-    fig,ax = plt.subplots(figsize=(12,5))
+    fig,ax = plt.subplots(figsize=(16,6))
     plt.title('Compare Previous Models Viscosity - T2LM NMR', pad=15)
 
     labels = metrics_ml.index.tolist()
@@ -414,9 +418,10 @@ def compare_prev(metrics_ml, name):
     ax.set_xlim(-0.5, 5.5)
     ax.set_ylim(0.0, 1.01)
     ax2.set_ylim(1000, 100000)
-    ax3.set_ylim(0, metrics_ml['MAE'].max()+500)
+    ax3.set_ylim(0, 16000)
 
     ax.set_xlabel('Authors Models', size=12)
+    ax.xaxis.set_label_coords(0.5, -.125)
     ax.set_ylabel(f'R{chr(0x00b2)}',)
     ax2.set_ylabel('RMSE')
     ax3.set_ylabel('MAE')
@@ -424,18 +429,20 @@ def compare_prev(metrics_ml, name):
     ax2.grid(False)
     ax3.grid(False)
 
-    width = 0.1
-    p1 = ax.bar(x-(width*2.75), metrics_ml['R2'], width=width, color='#006837', align='center', label='R2')
+    width = 0.075
+    p1 = ax.bar(x-(width*2.5), metrics_ml['R2'], width=width, color='#006837', align='center', label='R2')
     p4 = ax2.bar(x, metrics_ml['RMSE'], width=width, color='#042845', align='center', label='RMSE')
-    p6 = ax3.bar(x+(width*2.75), metrics_ml['MAE'], width=width, color='gray', align='center', label='MAE')
+    p6 = ax3.bar(x+(width*2.5), metrics_ml['MAE'], width=width, color='gray', align='center', label='MAE')
 
     lns = [p1,p4,p6]
     ax.legend(handles=lns, loc='best')
     ax2.set_yscale('log')
-    ax3.spines['right'].set_position(('outward', 60))  
-    ax3.xaxis.set_ticks([])
+    ax3.spines['right'].set_position(('outward', 80))  
+    ax3.xaxis.set_ticks([1000])
 
     ax.set_xticks(x)
+    ax2.set_xticks(x)
+    ax3.set_xticks(x)
     ax.set_xticklabels(labels)
 
     for p in p1:
@@ -444,11 +451,11 @@ def compare_prev(metrics_ml, name):
 
     for p in p4:
         height = p.get_height()
-        ax2.text(x=p.get_x()+0.05, y=height+1500,s="{}".format(height),ha='center', fontsize=10)
+        ax2.text(x=p.get_x()+0.05, y=height+2500,s="{}".format(height),ha='center', fontsize=10)
 
     for p in p6:
         height = p.get_height()
-        ax3.text(x=p.get_x()+0.075, y=height+30,s="{}".format(height),ha='center', fontsize=10)
+        ax3.text(x=p.get_x()+0.075, y=height+250,s="{}".format(height),ha='center', fontsize=10)
 
     plt.savefig(f'../reports/figures/compare_ML{name}.png', dpi=500, bbox_inches='tight', transparent = True)
     plt.show();
